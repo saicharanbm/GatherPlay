@@ -44,9 +44,15 @@ videoRouter.get("/feed", async (req, res) => {
     current_page: page,
   });
 });
+//send the secure url to the user for uploading video to s3 directly from the client without the fear of leaking any secrets
 videoRouter.post("/getSecureUrl", verifyUserMiddleware, (req, res) => {
   res.send("upload");
 });
+
+//get the uploaded video details from the from the client and add it to the database and push the video data to the queue
+//for the worker to process and transcode the video.
+
+
 videoRouter.post("/{videoId}", (req, res) => {
   res.send("upload");
 });
