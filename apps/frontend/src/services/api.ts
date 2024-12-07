@@ -8,12 +8,13 @@ const axiosInstance = axios.create({
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true, // Correct way to include cookies
 });
 
 export const userSignup = (data: SignupData) => {
-  return axiosInstance.post("/signup", data);
+  return axiosInstance.post("/auth/signup", data);
 };
 
 export const userLogin = (data: LoginData) => {
-  return axiosInstance.post("/login", data);
+  return axiosInstance.post("/auth/login", data);
 };

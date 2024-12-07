@@ -1,28 +1,9 @@
-import React, { useState, useEffect } from "react";
 import { NavLink } from "react-router-dom";
 import { IoMdSearch } from "react-icons/io";
 
-function Navbar() {
-  const [isScrolled, setIsScrolled] = useState(false);
-
-  // Monitor scrolling
-  useEffect(() => {
-    const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10); // Trigger when user scrolls down
-    };
-
-    window.addEventListener("scroll", handleScroll);
-
-    // Cleanup event listener on unmount
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
+function Navbar({ openModal }: { openModal: () => void }) {
   return (
-    <nav
-      className={`${
-        isScrolled ? "h-14 bg-opacity-80" : "h-16 bg-opacity-50"
-      } bg-[#262A2F] fixed top-0 w-full text-white flex items-center justify-between px-[5%] backdrop-blur-md transition-all duration-300 ease-in-out`}
-    >
+    <nav className="h-16 bg-[rgba(25,30,37,.8)] fixed top-0  w-full text-white flex items-center justify-between px-[5%] backdrop-blur-16 z-50  ">
       <div className="flex space-x-12">
         {/* Logo Section */}
         <div className="icon">
@@ -72,7 +53,10 @@ function Navbar() {
       </div>
 
       <div className="flex items-center space-x-4">
-        <div className="flex items-center p-2 cursor-pointer hover:bg-white rounded-full hover:text-gray-800">
+        <div
+          className="flex items-center p-2 cursor-pointer hover:bg-white rounded-full hover:text-gray-800"
+          onClick={() => openModal()}
+        >
           <IoMdSearch className="w-6 h-6" />
         </div>
         <NavLink
@@ -99,6 +83,13 @@ function Navbar() {
         >
           Signup
         </NavLink>
+        <div className="rounded-full p-1 cursor-pointer hover:bg-white transform duration-200 ease-in-out">
+          <img
+            src="https://m.media-amazon.com/images/G/02/CerberusPrimeVideo-FN38FSBD/adult-2.png"
+            alt="profile picture"
+            className="w-10 h-10 "
+          />
+        </div>
       </div>
     </nav>
   );
