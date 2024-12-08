@@ -6,6 +6,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { hash, compare } from "../Scrypt";
 import client from "@repo/db/client";
 import { generateAccessToken, generateRefreshToken } from "../utils";
+import { verifyUserMiddleware } from "../middlewares/verifyUserMiddleware";
 
 authRouter.post("/signup", async (req, res) => {
   const response = signupSchema.safeParse(req.body);
@@ -76,6 +77,7 @@ authRouter.post("/login", async (req, res) => {
 
 authRouter.post("/get-token", async (req, res) => {
   const refreshToken = req.cookies.refreshToken;
+  // console.log(refreshToken);
   if (!refreshToken) {
     res
       .status(401)
@@ -107,7 +109,7 @@ authRouter.post("/get-token", async (req, res) => {
     }
 
     const token = generateAccessToken(user.id);
-    res.json({ message: { token } });
+    res.json({ message: { token }, userId });
   } catch (error: any) {
     res.cookie("refreshToken", "", { httpOnly: true, expires: new Date(0) });
 
@@ -119,4 +121,29 @@ authRouter.post("/get-token", async (req, res) => {
       res.status(500).json({ message: "Internal Server Error" });
     }
   }
+});
+
+authRouter.post("/logout", (req, res) => {
+  res.cookie("refreshToken", "", { httpOnly: true, expires: new Date(0) });
+  res.json({ message: "Logout successful" });
+});
+
+authRouter.get("/me", verifyUserMiddleware, async (req, res) => {
+  const user = await client.user.findUnique({
+    where: {
+      id: req.userId,
+    },
+  });
+  console.log(req.headers);
+  if (!user) {
+    res.status(404).json({ message: "User not found" });
+    return;
+  }
+  res.json({
+    message: {
+      fullName: user.fullName,
+      email: user.email,
+      avatarUrl: user.avatarUrl,
+    },
+  });
 });

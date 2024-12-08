@@ -1,10 +1,12 @@
 import { useMutation } from "@tanstack/react-query";
 import { LoginData, SignupData } from "../types";
-import { userSignup, userLogin } from "./api";
+import api, { userSignup, userLogin } from "./api";
+import { queryClient } from "../main";
+
 import axios from "axios";
 
-export const usePostSignup = () =>
-  useMutation({
+export const usePostSignup = () => {
+  return useMutation({
     mutationFn: async (data: SignupData) => {
       try {
         const response = await userSignup(data);
@@ -19,9 +21,12 @@ export const usePostSignup = () =>
       }
     },
   });
+};
 
-export const usePostLogin = () =>
-  useMutation({
+export const usePostLogin = () => {
+  // const queryClient = useQueryClient();
+
+  return useMutation({
     mutationFn: async (data: LoginData) => {
       try {
         const response = await userLogin(data);
@@ -33,4 +38,36 @@ export const usePostLogin = () =>
         throw "An unexpected error occurred";
       }
     },
+    onSuccess: () => (data: { message: { token: string } }) => {
+      const { token } = data.message;
+      api.defaults.headers.Authorization = `Bearer ${token}`;
+
+      // Refetch user data or update global state
+      queryClient.invalidateQueries({ queryKey: ["auth", "user"] });
+    },
   });
+};
+
+export const usePostLogout = () => {
+  // const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async () => {
+      try {
+        const response = await api.post("/auth/logout");
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+          throw error.response.data?.message || "An unknown error occurred";
+        }
+        throw "An unexpected error occurred";
+      }
+    },
+    onSuccess: () => {
+      // Clear cached user data
+      queryClient.setQueryData(["auth", "user"], null);
+
+      // Remove the Authorization header
+      api.defaults.headers.Authorization = null;
+    },
+  });
+};

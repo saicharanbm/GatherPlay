@@ -3,10 +3,12 @@ import "./App.css";
 import Navbar from "./components/Navbar";
 import { useState } from "react";
 import SearchModel from "./components/SearchModel";
-import Toast from "./components/Toast";
+import { useAuthQuery } from "./services/queries";
+// import Toast from "./components/Toast";
 
 function App() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const { data: user, isLoading, error } = useAuthQuery();
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
@@ -24,7 +26,11 @@ function App() {
           <SearchModel />
         </div>
       )}
-      {/* <Toast /> */}
+      {isLoading && <div className="text-white">Loading...</div>}
+
+      {error && <div className="text-white">Error: {error.message}</div>}
+
+      {user && <div className="text-white">{user.message.fullName}</div>}
     </div>
   );
 }

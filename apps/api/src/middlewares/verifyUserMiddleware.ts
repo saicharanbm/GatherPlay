@@ -38,6 +38,13 @@ export const verifyUserMiddleware = async (
     next(); // Proceed to the next middleware
   } catch (error) {
     console.error("Authentication error:", error);
+    if (
+      error instanceof jwt.JsonWebTokenError &&
+      error.name === "TokenExpiredError"
+    ) {
+      res.status(401).json({ message: "Unauthorized: Token expired" });
+      return;
+    }
     res.status(401).json({ message: "Unauthorized: Invalid token" });
     return;
   }

@@ -11,7 +11,7 @@ import Signup from "./components/Signup.tsx";
 // import SearchModel from "./components/SearchModel.tsx";
 import Upload from "./components/Upload.tsx";
 
-const queryClient = new QueryClient();
+export const queryClient = new QueryClient();
 
 const router = createBrowserRouter([
   {
