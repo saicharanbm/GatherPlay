@@ -3,58 +3,31 @@ import { Link } from "react-router-dom";
 import { FaEyeSlash } from "react-icons/fa";
 import { IoEyeSharp } from "react-icons/io5";
 import { usePostLogin } from "../services/mutations";
-type signinErrors = {
-  email?: string;
-  password?: string;
+import { useForm, SubmitHandler } from "react-hook-form";
+type loginData = {
+  email: string;
+  password: string;
 };
 function Login() {
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
   const { mutate: login, error, isPending } = usePostLogin();
-  const [errors, setErrors] = useState<signinErrors>({});
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<loginData>({ mode: "onChange" });
 
-  const validate = () => {
-    const newErrors: signinErrors = {};
-    formData.email = formData.email.trim();
-    formData.password = formData.password.trim();
-
-    if (!formData.email) {
-      newErrors.email = "Email address is required";
-    }
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters.";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (validate()) {
-      console.log("Form submitted successfully:", formData);
-      login(formData, {
-        onSuccess: (data) => {
-          console.log("Login successful");
-          console.log(data);
-        },
-        onError: (error) => {
-          console.log("Login failed");
-          console.log(error);
-        },
-      });
-    }
+  const handlLogin: SubmitHandler<loginData> = (data) => {
+    login(data, {
+      onSuccess: (data) => {
+        console.log("Login successful");
+        console.log(data);
+      },
+      onError: (error) => {
+        console.log("Login failed");
+        console.log(error);
+      },
+    });
   };
   return (
     <div className="w-full min-h-[calc(100vh-4rem)]  text-white flex justify-center items-center">
@@ -63,7 +36,7 @@ function Login() {
           Login
         </h1>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit(handlLogin)}>
           <div>
             <label
               htmlFor="email"
@@ -72,15 +45,19 @@ function Login() {
               Email Address
             </label>
             <input
-              type="email"
               id="email"
-              value={formData.email}
-              onChange={handleChange}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Invalid email address",
+                },
+              })}
               placeholder="Enter your email"
               className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             {errors.email && (
-              <p className="text-sm text-red-500">{errors.email}</p>
+              <p className="text-sm text-red-500">{errors.email.message}</p>
             )}
           </div>
 
@@ -96,8 +73,13 @@ function Login() {
               <input
                 type={passwordVisible ? "text" : "password"}
                 id="password"
-                value={formData.password}
-                onChange={handleChange}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 8 characters",
+                  },
+                })}
                 placeholder="Create a password"
                 className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none pr-10"
               />
@@ -110,7 +92,7 @@ function Login() {
             </div>
 
             {errors.password && (
-              <p className="text-sm text-red-500">{errors.password}</p>
+              <p className="text-sm text-red-500">{errors.password.message}</p>
             )}
             {error && (
               <p className="text-sm text-red-500">

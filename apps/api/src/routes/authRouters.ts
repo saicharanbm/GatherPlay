@@ -61,7 +61,10 @@ authRouter.post("/login", async (req, res) => {
     //generate a access token jwt token
     const token = generateAccessToken(user.id);
 
-    res.cookie("refreshToken", refreshToken, { httpOnly: true });
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+    });
 
     res.json({
       message: {

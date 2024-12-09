@@ -30,7 +30,7 @@ function App() {
 
       {error && <div className="text-white">Error: {error.message}</div>}
 
-      {user && <div className="text-white">{user.message.fullName}</div>}
+      {user && <div className="text-white">{user.fullName}</div>}
     </div>
   );
 }

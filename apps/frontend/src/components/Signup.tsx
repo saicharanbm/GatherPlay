@@ -4,85 +4,42 @@ import { FaEyeSlash } from "react-icons/fa";
 import { IoEyeSharp } from "react-icons/io5";
 import { usePostSignup } from "../services/mutations";
 import { useNavigate } from "react-router-dom";
+import { useForm, SubmitHandler } from "react-hook-form";
 
-type signupErrors = {
-  fullName?: string;
-  email?: string;
-  password?: string;
-  confirmPassword?: string;
+type signupData = {
+  fullName: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
 };
 
 function Signup() {
-  const [formData, setFormData] = useState({
-    fullName: "",
-    email: "",
-    password: "",
-    confirmPassword: "",
-  });
-  const { mutate: signup, error, isPending } = usePostSignup();
-  const navigate = useNavigate();
-
-  const [errors, setErrors] = useState<signupErrors>({});
   const [passwordVisible, setPasswordVisible] = useState(false); // For password visibility
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false); // For confirm password visibility
 
-  const validate = () => {
-    const newErrors: signupErrors = {};
-    formData.fullName = formData.fullName.trim();
-    formData.email = formData.email.trim();
-    formData.password = formData.password.trim();
-    formData.confirmPassword = formData.confirmPassword.trim();
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<signupData>({ mode: "onChange" });
 
-    if (!formData.fullName) {
-      newErrors.fullName = "Full name is required.";
-    }
+  const { mutate: signup, error, isPending } = usePostSignup();
+  const navigate = useNavigate();
 
-    if (!formData.email) {
-      newErrors.email = "Email address is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
-      newErrors.email = "Enter a valid email address.";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required.";
-    } else if (formData.password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters.";
-    }
-
-    if (!formData.confirmPassword) {
-      newErrors.confirmPassword = "Please confirm your password.";
-    } else if (formData.password !== formData.confirmPassword) {
-      newErrors.confirmPassword = "Passwords do not match.";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
-
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (validate()) {
-      console.log("Form submitted successfully:", formData);
-      signup(formData, {
-        onSuccess: (data) => {
-          console.log("Signup successful");
-          console.log(data);
-          navigate("/login");
-        },
-        onError: (error) => {
-          console.log("Signup failed");
-          console.log(error);
-        },
-      });
-    }
+  const handleSignup: SubmitHandler<signupData> = (data) => {
+    console.log(data);
+    signup(data, {
+      onSuccess: (data) => {
+        console.log("Signup successful");
+        console.log(data);
+        navigate("/login");
+      },
+      onError: (error) => {
+        console.log("Signup failed");
+        console.log(error);
+      },
+    });
   };
 
   return (
@@ -92,7 +49,7 @@ function Signup() {
           Sign Up
         </h1>
 
-        <form className="space-y-4" onSubmit={handleSubmit}>
+        <form className="space-y-4" onSubmit={handleSubmit(handleSignup)}>
           {/* Full Name Field */}
           <div>
             <label
@@ -104,13 +61,18 @@ function Signup() {
             <input
               type="text"
               id="fullName"
-              value={formData.fullName}
-              onChange={handleChange}
+              {...register("fullName", {
+                required: "Full name is required",
+                minLength: {
+                  value: 3,
+                  message: "Full name must be at least 3 characters long",
+                },
+              })}
               placeholder="Enter your full name"
-              className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none "
             />
             {errors.fullName && (
-              <p className="text-sm text-red-500">{errors.fullName}</p>
+              <p className="text-sm text-red-500">{errors.fullName.message}</p>
             )}
           </div>
 
@@ -123,15 +85,19 @@ function Signup() {
               Email Address
             </label>
             <input
-              type="email"
               id="email"
-              value={formData.email}
-              onChange={handleChange}
+              {...register("email", {
+                required: "Email is required",
+                pattern: {
+                  value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+                  message: "Enter a valid email address",
+                },
+              })}
               placeholder="Enter your email"
               className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
             />
             {errors.email && (
-              <p className="text-sm text-red-500">{errors.email}</p>
+              <p className="text-sm text-red-500">{errors.email.message}</p>
             )}
           </div>
 
@@ -147,8 +113,13 @@ function Signup() {
               <input
                 type={passwordVisible ? "text" : "password"}
                 id="password"
-                value={formData.password}
-                onChange={handleChange}
+                {...register("password", {
+                  required: "Password is required",
+                  minLength: {
+                    value: 6,
+                    message: "Password must be at least 6 characters",
+                  },
+                })}
                 placeholder="Create a password"
                 className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none pr-10"
               />
@@ -161,7 +132,7 @@ function Signup() {
             </div>
 
             {errors.password && (
-              <p className="text-sm text-red-500">{errors.password}</p>
+              <p className="text-sm text-red-500">{errors.password.message}</p>
             )}
           </div>
           {/* Confirm Password Field */}
@@ -176,8 +147,12 @@ function Signup() {
               <input
                 type={confirmPasswordVisible ? "text" : "password"}
                 id="confirmPassword"
-                value={formData.confirmPassword}
-                onChange={handleChange}
+                {...register("confirmPassword", {
+                  required: "Confirm password is required",
+                  validate: (value) =>
+                    value === watch("password") ||
+                    "Passwords do not match. Please try again.",
+                })}
                 placeholder="Confirm your password"
                 className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none pr-10"
               />
@@ -185,11 +160,13 @@ function Signup() {
                 onClick={() => setConfirmPasswordVisible((prev) => !prev)}
                 className="absolute right-3 top-1/2 transform -translate-y-1/2 cursor-pointer text-white"
               >
-                {passwordVisible ? <FaEyeSlash /> : <IoEyeSharp />}
+                {confirmPasswordVisible ? <FaEyeSlash /> : <IoEyeSharp />}
               </div>
             </div>
             {errors.confirmPassword && (
-              <p className="text-sm text-red-500">{errors.confirmPassword}</p>
+              <p className="text-sm text-red-500">
+                {errors.confirmPassword.message}
+              </p>
             )}
             {error && (
               <p style={{ color: "red" }}>{error as unknown as string}</p>

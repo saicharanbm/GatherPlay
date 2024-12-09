@@ -10,7 +10,7 @@ export const usePostSignup = () => {
     mutationFn: async (data: SignupData) => {
       try {
         const response = await userSignup(data);
-        return response.data;
+        return response.data.message;
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           // Throw the server's error message
@@ -24,13 +24,11 @@ export const usePostSignup = () => {
 };
 
 export const usePostLogin = () => {
-  // const queryClient = useQueryClient();
-
   return useMutation({
     mutationFn: async (data: LoginData) => {
       try {
         const response = await userLogin(data);
-        return response.data;
+        return response.data.message;
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           throw error.response.data?.message || "An unknown error occurred";
@@ -38,8 +36,9 @@ export const usePostLogin = () => {
         throw "An unexpected error occurred";
       }
     },
-    onSuccess: () => (data: { message: { token: string } }) => {
-      const { token } = data.message;
+    onSuccess: (data: { token: string }) => {
+      const { token } = data;
+      console.log("login sussessful from onSuccess listener.");
       api.defaults.headers.Authorization = `Bearer ${token}`;
 
       // Refetch user data or update global state
@@ -54,7 +53,7 @@ export const usePostLogout = () => {
     mutationFn: async () => {
       try {
         const response = await api.post("/auth/logout");
-        return response.data;
+        return response.data.message;
       } catch (error) {
         if (axios.isAxiosError(error) && error.response) {
           throw error.response.data?.message || "An unknown error occurred";

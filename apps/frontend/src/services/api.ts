@@ -13,32 +13,6 @@ const axiosInstance = axios.create({
   withCredentials: true, // Correct way to include cookies
 });
 
-// axiosInstance.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     if (
-//       error.response?.status === 401 &&
-//       error.config &&
-//       !error.config._retry
-//     ) {
-//       try {
-//         const refreshResponse = await axios.post("/auth/get-token");
-//         const newAccessToken = refreshResponse.data.message.token;
-
-//         axiosInstance.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
-//         error.config.headers.Authorization = `Bearer ${newAccessToken}`;
-//         error.config._retry = true;
-
-//         return axiosInstance(error.config); // Retry the failed request
-//       } catch (refreshError) {
-//         queryClient.setQueryData(["auth", "user"], null); // Clear cached user data
-//         throw refreshError; // Re-throw to notify the caller
-//       }
-//     }
-//     return Promise.reject(error);
-//   }
-// );
-
 axiosInstance.interceptors.response.use(
   (response) => response, // Return response for successful requests
   async (error) => {
@@ -51,7 +25,8 @@ axiosInstance.interceptors.response.use(
         error.response?.data?.message === "Unauthorized: No token provided") &&
       !originalRequest._retry // Ensure no infinite loops
     ) {
-      originalRequest._retry = true; // Mark the request as retried
+      //if the original fails again we and directly return the error.
+      originalRequest._retry = true;
 
       try {
         // Attempt to refresh the token
@@ -59,8 +34,12 @@ axiosInstance.interceptors.response.use(
 
         const newAccessToken = refreshResponse.data.message.token;
 
-        // Set new access token in headers
+        // Set new access token in headers for the future requests
         axiosInstance.defaults.headers.Authorization = `Bearer ${newAccessToken}`;
+
+        // Set new access token in headers to the original request
+        //even though we have set the toakes in the global axios instance it is important to add it to the original request
+        //because Global Defaults Do Not Affect Already Prepared Requests
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
 
         // Retry the original request with the new token

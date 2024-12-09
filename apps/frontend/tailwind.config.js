@@ -17,7 +17,24 @@ export default {
         "search-box":
           "0 4px 4px 0 rgba(0, 0, 0, 0.3), 0 8px 12px 6px rgba(0, 0, 0, 0.15)",
       },
+      colors: {
+        "input-bg": "#2C2C2E", // Match your input background
+        "input-text": "#ffffff", // Match your input text color
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    function ({ addUtilities }) {
+      addUtilities(
+        {
+          ".autofill": {
+            "@apply bg-input-bg text-input-text border-gray-600": {},
+            "-webkit-box-shadow": "0 0 0 1000px #2C2C2E inset",
+            "box-shadow": "0 0 0 1000px #2C2C2E inset",
+          },
+        },
+        ["responsive", "hover"]
+      );
+    },
+  ],
 };

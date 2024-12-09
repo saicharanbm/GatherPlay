@@ -12,3 +12,9 @@
 body {
   background-color: black;
 }
+
+input:-webkit-autofill:focus,
+input:-webkit-autofill {
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: #ffffff;
+}
