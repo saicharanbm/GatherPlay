@@ -1,7 +1,12 @@
 import { NavLink } from "react-router-dom";
 import { IoMdSearch } from "react-icons/io";
+import { queryClient } from "../main";
 
 function Navbar({ openModal }: { openModal: () => void }) {
+  const userData = queryClient.getQueriesData({
+    queryKey: ["auth"],
+  })?.[0]?.[1] as { avatarUrl: string };
+  console.log(userData);
   return (
     <nav className="h-16 bg-[rgba(25,30,37,.8)] fixed top-0  w-full text-white flex items-center justify-between px-[5%] backdrop-blur-16 z-50  ">
       <div className="flex space-x-12">
@@ -59,37 +64,45 @@ function Navbar({ openModal }: { openModal: () => void }) {
         >
           <IoMdSearch className="w-6 h-6" />
         </div>
-        <NavLink
-          to="/login"
-          className={({ isActive }) =>
-            `text-lg p-1 rounded cursor-pointer ${
-              isActive
-                ? "bg-white text-gray-800 opacity-50 font-semibold"
-                : "hover:bg-white hover:text-gray-800"
-            }`
-          }
-        >
-          Login
-        </NavLink>
-        <NavLink
-          to="/signup"
-          className={({ isActive }) =>
-            `text-lg p-1 rounded cursor-pointer ${
-              isActive
-                ? "bg-white text-gray-800 opacity-50 font-semibold"
-                : "hover:bg-white hover:text-gray-800"
-            }`
-          }
-        >
-          Signup
-        </NavLink>
-        <div className="rounded-full p-1 cursor-pointer hover:bg-white transform duration-200 ease-in-out">
-          <img
-            src="https://m.media-amazon.com/images/G/02/CerberusPrimeVideo-FN38FSBD/adult-2.png"
-            alt="profile picture"
-            className="w-10 h-10 "
-          />
-        </div>
+        {userData ? (
+          <div className="rounded-full p-1 cursor-pointer hover:bg-white transform duration-200 ease-in-out">
+            <img
+              src={
+                userData?.avatarUrl ||
+                "https://m.media-amazon.com/images/G/02/CerberusPrimeVideo-FN38FSBD/adult-2.png"
+              }
+              alt="profile picture"
+              className="w-10 h-10 rounded-full"
+            />
+          </div>
+        ) : (
+          <>
+            <NavLink
+              to="/login"
+              className={({ isActive }) =>
+                `text-lg p-1 rounded cursor-pointer ${
+                  isActive
+                    ? "bg-white text-gray-800 opacity-50 font-semibold"
+                    : "hover:bg-white hover:text-gray-800"
+                }`
+              }
+            >
+              Login
+            </NavLink>
+            <NavLink
+              to="/signup"
+              className={({ isActive }) =>
+                `text-lg p-1 rounded cursor-pointer ${
+                  isActive
+                    ? "bg-white text-gray-800 opacity-50 font-semibold"
+                    : "hover:bg-white hover:text-gray-800"
+                }`
+              }
+            >
+              Signup
+            </NavLink>
+          </>
+        )}
       </div>
     </nav>
   );

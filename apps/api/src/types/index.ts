@@ -13,6 +13,20 @@ export const channelSchema = z.object({
   description: z.string(),
   slug: z.string(),
 });
+export const uploadChannelSchema = z.object({
+  avatarName: z.string(),
+  avatarType: z.string().includes("image"),
+  avatarSize: z
+    .number()
+    .gte(0)
+    .lte(5 * 1024 * 1024),
+  headerName: z.string(),
+  headerType: z.string().includes("image"),
+  headerSize: z
+    .number()
+    .gte(0)
+    .lte(5 * 1024 * 1024),
+});
 
 declare global {
   namespace Express {

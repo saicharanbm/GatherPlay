@@ -31,7 +31,8 @@ model Channel {
   id          String   @id @unique @default(cuid())
   name        String
   description String
-  avatarUrl   String?
+  avatarUrl   String
+  headerUrl   String
   slug        String   @unique
   userId      String   @unique
   user        User     @relation(fields: [userId], references: [id])
@@ -50,7 +51,7 @@ model Video {
   duration  Int
   // timestamp Int
   view_count  Int           @default(0)
-  status      videoStatus
+  status      videoStatus   @default(PROCESSING)
   created_at  DateTime      @default(now())
   updated_at  DateTime      @updatedAt
   channelId      String

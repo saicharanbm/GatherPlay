@@ -73,5 +73,8 @@ export const fetchMe = () => {
 export const userLogout = () => {
   return axiosInstance.post("/auth/logout");
 };
+export const fetchMyChannel = () => {
+  return axiosInstance.get("/channel/me");
+};
 
 export default axiosInstance;

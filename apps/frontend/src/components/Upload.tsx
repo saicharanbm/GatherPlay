@@ -1,22 +1,64 @@
 import React from "react";
+import { useForm, SubmitHandler } from "react-hook-form";
+
+enum videoCategory {
+  Entertainment = "ENTERTAINMENT",
+  News = "NEWS",
+  Sports = "SPORTS",
+  Fashon = "FASHON",
+  General = "GENERAL",
+}
+
+interface formData {
+  title: string;
+  description: string;
+  category: videoCategory;
+  file: File;
+  thumbnail: File;
+}
 
 function Upload() {
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<formData>({ mode: "onChange" });
+
+  const handleUpload: SubmitHandler<formData> = (data) => {
+    console.log(data); // You can handle the form data here
+  };
+
   return (
-    <div className="w-full min-h-[calc(100vh-4rem)] text-white flex justify-center items-center py-4 px-4  sm:px-24">
-      <div className="w-full max-w-[90rem] bg-[#1C1C1E] rounded-lg p-8 shadow-zinc-900 flex flex-col gap-4">
-        <h1 className="text-2xl font-bold text-white text-center  sm:text-3xl">
+    <div className="w-full min-h-[calc(100vh-4rem)] text-white flex justify-center items-center py-4 px-4 sm:px-24">
+      <form
+        onSubmit={handleSubmit(handleUpload)}
+        className="w-full max-w-[90rem] bg-[#1C1C1E] rounded-lg p-8 shadow-zinc-900 flex flex-col gap-4"
+      >
+        <h1 className="text-2xl font-bold text-white text-center sm:text-3xl">
           Upload
         </h1>
-        <div className="upload-file relative w-full h-[20rem] bg-[#2C2C2E] flex justify-center items-center rounded-lg">
+        <div className="upload-file-container relative w-full h-[20rem] bg-[#2C2C2E] flex justify-center items-center rounded-lg">
           <input
             type="file"
-            id="file"
-            onChange={(e) => console.log(e.target.files)}
-            className=" top-0 left-0 w-full h-full opacity-0 bg-transparent z-10 cursor-pointer"
+            className="top-0 left-0 w-full h-full opacity-0 bg-transparent z-10 cursor-pointer"
+            {...register("file", {
+              required: "File is required",
+              validate: {
+                fileSize: (file) => {
+                  console.log(file);
+                  return (
+                    file.size <= 100 * 1024 * 1024 ||
+                    "File size should be less than 100 MB"
+                  ); // 5MB limit
+                },
+                fileType: (file) =>
+                  file.type.includes("video") || "Only Video files are allowed",
+              },
+            })}
           />
-          <div className="absolute flex flex-col items-center justify-center  w-[70%] ">
+          <div className="absolute flex flex-col items-center justify-center w-[70%]">
             <svg
-              className=" w-[20%] my-auto sm:w-[10%]"
+              className="w-[20%] my-auto sm:w-[10%]"
               viewBox="0 0 24 24"
               xmlns="http://www.w3.org/2000/svg"
             >
@@ -33,9 +75,11 @@ function Upload() {
             </p>
           </div>
         </div>
-        <div>
+        {errors.file && <p className="text-red-500">{errors.file.message}</p>}
+
+        <div className="title-container">
           <label
-            htmlFor="fullName"
+            htmlFor="title"
             className="block text-sm font-medium text-gray-300 mb-1 "
           >
             Title
@@ -43,11 +87,22 @@ function Upload() {
           <input
             type="text"
             id="title"
+            {...register("title", {
+              required: "Title is required",
+              minLength: {
+                value: 3,
+                message: "Title must be at least 3 characters long",
+              },
+            })}
             placeholder="Enter video title"
             className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
+          {errors.title && (
+            <p className="text-red-500">{errors.title.message}</p>
+          )}
         </div>
-        <div>
+
+        <div className="description-container">
           <label
             htmlFor="description"
             className="block text-sm font-medium text-gray-300 mb-1 "
@@ -56,11 +111,23 @@ function Upload() {
           </label>
           <textarea
             id="description"
+            {...register("description", {
+              required: "Description is required",
+              minLength: {
+                value: 10,
+                message: "Description must be at least 10 characters long",
+              },
+            })}
+            rows={4}
             placeholder="Enter video description"
             className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
           />
+          {errors.description && (
+            <p className="text-red-500">{errors.description.message}</p>
+          )}
         </div>
-        <div>
+
+        <div className="category-container">
           <label
             htmlFor="category"
             className="block text-sm font-medium text-gray-300 mb-1 "
@@ -69,16 +136,67 @@ function Upload() {
           </label>
           <select
             id="category"
-            className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none resize-none"
+            {...register("category", { required: "Category is required" })}
+            className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
           >
-            <option value="general">General</option>
-            <option value="entertainment">ENTERTAINMENT</option>
-            <option value="sports">SPORTS</option>
-            <option value="news">NEWS</option>
-            <option value="fashon">FASHON</option>
+            <option value="">SELECT A CATEGORY</option>
+            <option value={videoCategory.General}>GENERAL</option>
+            <option value={videoCategory.Entertainment}>ENTERTAINMENT</option>
+            <option value={videoCategory.Sports}>SPORTS</option>
+            <option value={videoCategory.News}>NEWS</option>
+            <option value={videoCategory.Fashon}>FASHON</option>
           </select>
+          {errors.category && (
+            <p className="text-red-500">{errors.category.message}</p>
+          )}
         </div>
-      </div>
+
+        <div className="thumbnail-container">
+          <label
+            htmlFor="thumbnail"
+            className="block text-sm font-medium text-gray-300 mb-1 "
+          >
+            Thumbnail
+          </label>
+          <input
+            type="file"
+            id="thumbnail"
+            {...register("thumbnail", {
+              required: "Thumbnail is required",
+              validate: {
+                fileSize: (file) => {
+                  return (
+                    file.size <= 5 * 1024 * 1024 ||
+                    "Thumbnail size should be less than 5MB"
+                  );
+                },
+                fileType: (file) => {
+                  return (
+                    ["image/jpeg", "image/png", "image/gif"].includes(
+                      file.type
+                    ) || "Only JPEG, PNG, and GIF images are allowed"
+                  );
+                },
+              },
+            })}
+            placeholder="Enter video title"
+            className="w-full bg-[#2C2C2E] text-white rounded-lg p-3 border border-gray-600 focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          />
+          {errors.thumbnail && (
+            <p className="text-red-500">{errors.thumbnail.message}</p>
+          )}
+        </div>
+
+        {/* Add the Submit button */}
+        <div className="submit-container mt-4">
+          <button
+            type="submit"
+            className="bg-blue-600 text-white rounded-lg py-3 px-6 hover:bg-blue-700 focus:outline-none"
+          >
+            Upload Video
+          </button>
+        </div>
+      </form>
     </div>
   );
 }

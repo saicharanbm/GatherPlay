@@ -10,6 +10,8 @@ import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Signup from "./components/Signup.tsx";
 // import SearchModel from "./components/SearchModel.tsx";
 import Upload from "./components/Upload.tsx";
+import CreateChannel from "./components/channel/CreateChannel.tsx";
+import Channel from "./components/channel/Channel.tsx";
 
 export const queryClient = new QueryClient();
 
@@ -33,6 +35,10 @@ const router = createBrowserRouter([
       {
         path: "/upload",
         element: <Upload />,
+      },
+      {
+        path: "/channel",
+        element: <Channel />,
       },
     ],
   },

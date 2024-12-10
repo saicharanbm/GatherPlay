@@ -1,6 +1,15 @@
 import client from "@repo/db/client";
 import jwt from "jsonwebtoken";
 
+export const getUserChannel = async (userId: string) => {
+  const channel = await client.channel.findUnique({
+    where: {
+      userId,
+    },
+  });
+  return channel;
+};
+
 export const getSubscribersCount = async (channelId: string) => {
   const subCount = await client.subscription.count({
     where: {

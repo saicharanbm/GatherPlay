@@ -9,4 +9,4 @@ export const router = Router();
 
 router.use("/auth", authRouter);
 router.use("/videos", videoRouter);
-router.use("/channels", channelRouter);
+router.use("/channel", channelRouter);
