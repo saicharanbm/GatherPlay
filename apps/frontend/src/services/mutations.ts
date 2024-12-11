@@ -1,6 +1,16 @@
 import { useMutation } from "@tanstack/react-query";
-import { LoginData, SignupData } from "../types";
-import api, { userSignup, userLogin } from "./api";
+import {
+  ChannelFormData,
+  ChannelSecureURLData,
+  LoginData,
+  SignupData,
+} from "../types";
+import api, {
+  userSignup,
+  userLogin,
+  fetchChnnelSecureURLS,
+  createChannel,
+} from "./api";
 import { queryClient } from "../main";
 
 import axios from "axios";
@@ -69,4 +79,48 @@ export const usePostLogout = () => {
       api.defaults.headers.Authorization = null;
     },
   });
+};
+
+export const useCreateChannelMutation = () => {
+  const fetchSignedURLSMutation = useMutation({
+    mutationFn: async (data: ChannelSecureURLData) => {
+      try {
+        const response = await fetchChnnelSecureURLS(data);
+        return response.data.message;
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+          throw error.response.data?.message || "An unknown error occurred";
+        }
+        throw "An unexpected error occurred";
+      }
+    },
+  });
+  const uploadImagesToS3 = useMutation({
+    mutationFn: async (data: ChannelSecureURLData) => {
+      try {
+        const response = await fetchChnnelSecureURLS(data);
+        return response.data;
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+          throw error.response.data || "An unknown error occurred";
+        }
+        throw "An unexpected error occurred";
+      }
+    },
+  });
+  const createChannelMutation = useMutation({
+    mutationFn: async (data: ChannelFormData) => {
+      try {
+        const response = await createChannel(data);
+        return response.data.message;
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response) {
+          throw error.response.data?.message || "An unknown error occurred";
+        }
+        throw "An unexpected error occurred";
+      }
+    },
+  });
+
+  return { fetchSignedURLSMutation, uploadImagesToS3, createChannelMutation };
 };

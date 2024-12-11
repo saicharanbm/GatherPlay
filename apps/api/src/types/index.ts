@@ -12,6 +12,8 @@ export const channelSchema = z.object({
   name: z.string(),
   description: z.string(),
   slug: z.string(),
+  avatarURL: z.string(),
+  headerURL: z.string(),
 });
 export const uploadChannelSchema = z.object({
   avatarName: z.string(),

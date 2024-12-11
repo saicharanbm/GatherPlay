@@ -19,14 +19,21 @@ channelRouter.post("/", verifyUserMiddleware, async (req, res) => {
   try {
     const channel = await client.channel.create({
       data: {
-        userId: req.userId,
+        slug: input.data.slug,
         name: input.data.name,
         description: input.data.description,
-        slug: input.data.slug,
+        userId: req.userId,
+        avatarUrl: input.data.avatarURL,
+        headerUrl: input.data.headerURL,
       },
     });
+    if (!channel) {
+      res.status(400).json({ message: "Channel not created" });
+      return;
+    }
+    res.status(201).json({ message: "Channel created successfully" });
   } catch (error) {
-    res;
+    res.status(400).json({ message: "Channel not created" });
   }
 });
 
@@ -73,33 +80,37 @@ channelRouter.get("/me", verifyUserMiddleware, async (req, res) => {
 
 //get signed  url to upload avatar and cover image to s3 directly from the client without the fear of leaking any secrets
 
-channelRouter.post("/getSecureUrl", verifyUserMiddleware, async (req, res) => {
-  if (!req.userId) {
-    res.status(401).json({ message: "Unauthorized: User not found" });
-    return;
-  }
-  const request = uploadChannelSchema.safeParse(req.body);
-
-  if (!request.success) {
-    res.status(400).json({ message: "Please provide valid credentials" });
-    return;
-  }
-  try {
-    const user = await getUserChannel(req.userId);
-    if (!user) {
-      res.status(404).json({ message: "Channel not found" });
+channelRouter.post(
+  "/get-signed-url",
+  verifyUserMiddleware,
+  async (req, res) => {
+    if (!req.userId) {
+      res.status(401).json({ message: "Unauthorized: User not found" });
       return;
     }
-    const avatarSecureUrl = await getSecureUrl(
-      request.data.avatarName,
-      request.data.avatarType
-    );
-    const headerSecureUrl = await getSecureUrl(
-      request.data.headerName,
-      request.data.headerType
-    );
-    res.json({ message: { avatarSecureUrl, headerSecureUrl } });
-  } catch (error) {
-    res.status(400).json({ message: "Please provide valid credentials" });
+    const request = uploadChannelSchema.safeParse(req.body);
+
+    if (!request.success) {
+      res.status(400).json({ message: "Please provide valid credentials" });
+      return;
+    }
+    try {
+      const user = await getUserChannel(req.userId);
+      if (!user) {
+        res.status(404).json({ message: "Channel not found" });
+        return;
+      }
+      const avatarSecureUrl = await getSecureUrl(
+        "channelAssets",
+        request.data.avatarType
+      );
+      const headerSecureUrl = await getSecureUrl(
+        "channelAssets",
+        request.data.headerType
+      );
+      res.json({ message: { avatarSecureUrl, headerSecureUrl } });
+    } catch (error) {
+      res.status(400).json({ message: "Please provide valid credentials" });
+    }
   }
-});
+);

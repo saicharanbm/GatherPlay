@@ -1,7 +1,12 @@
 import axios from "axios";
 import { queryClient } from "../main";
 
-import { LoginData, SignupData } from "../types";
+import {
+  ChannelFormData,
+  ChannelSecureURLData,
+  LoginData,
+  SignupData,
+} from "../types";
 
 const baseURL = "http://localhost:3000/api/v1";
 
@@ -75,6 +80,22 @@ export const userLogout = () => {
 };
 export const fetchMyChannel = () => {
   return axiosInstance.get("/channel/me");
+};
+
+export const fetchChnnelSecureURLS = (data: ChannelSecureURLData) => {
+  return axiosInstance.post("/channel/get-signed-url", data);
+};
+
+export const createChannel = (data: ChannelFormData) => {
+  return axiosInstance.post("/channel", data);
+};
+
+export const uploadFileToS3 = (url: string, file: File) => {
+  return axios.put(url, file, {
+    headers: {
+      "Content-Type": file.type,
+    },
+  });
 };
 
 export default axiosInstance;
