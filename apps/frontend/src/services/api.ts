@@ -91,7 +91,7 @@ export const createChannel = (data: ChannelFormData) => {
 };
 
 export const uploadFileToS3 = (url: string, file: File) => {
-  return axios.put(url, file, {
+  return axios.post(url, file, {
     headers: {
       "Content-Type": file.type,
     },
