@@ -1,6 +1,6 @@
 import { Outlet, useLocation } from "react-router-dom";
 import "./App.css";
-import Navbar from "./components/Navbar";
+import Navbar from "./components/navbar components/Navbar";
 import { useState } from "react";
 import SearchModel from "./components/SearchModel";
 import useAuth from "./hook/useAuth";
@@ -19,7 +19,11 @@ function App() {
 
   return (
     <div className="bg-[#00050D] w-full min-h-screen pt-16">
-      <Navbar openModal={openModal} />
+      <Navbar
+        openModal={openModal}
+        closeModal={closeModal}
+        userData={userData}
+      />
 
       {isLoading && <div className="text-white">Loading...</div>}
 

@@ -25,6 +25,7 @@ authRouter.post("/signup", async (req, res) => {
     });
     res.json({ message: "User successfully registered" });
   } catch (error) {
+    console.log(error);
     res.status(409).json({ message: "Username or email already exists" });
   }
 });
